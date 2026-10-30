@@ -1,0 +1,355 @@
+// PsiClin - Modelo de dados
+// Todas as chaves primárias e estrangeiras utilizam UUID nativo do PostgreSQL.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────── Enums ───────────────────────────────
+
+enum Role {
+  ADMIN
+  PSICOLOGO
+  RECEPCAO
+}
+
+enum PatientStatus {
+  ATIVO
+  INATIVO
+  ALTA
+  LISTA_ESPERA
+}
+
+enum Gender {
+  FEMININO
+  MASCULINO
+  NAO_BINARIO
+  OUTRO
+  NAO_INFORMADO
+}
+
+enum AppointmentStatus {
+  AGENDADO
+  CONFIRMADO
+  REALIZADO
+  FALTOU
+  CANCELADO
+}
+
+enum AppointmentMode {
+  PRESENCIAL
+  ONLINE
+}
+
+enum SessionType {
+  INDIVIDUAL
+  CASAL
+  FAMILIA
+  GRUPO
+  AVALIACAO
+  TRIAGEM
+}
+
+enum TransactionType {
+  RECEITA
+  DESPESA
+}
+
+enum TransactionStatus {
+  PENDENTE
+  PAGO
+  CANCELADO
+}
+
+enum PaymentMethod {
+  PIX
+  DINHEIRO
+  CARTAO_CREDITO
+  CARTAO_DEBITO
+  TRANSFERENCIA
+  BOLETO
+  CONVENIO
+}
+
+enum DocumentType {
+  ATESTADO
+  DECLARACAO
+  RECIBO
+  RELATORIO
+  LAUDO
+  ENCAMINHAMENTO
+  CONTRATO
+}
+
+// ─────────────────────────────── Models ──────────────────────────────
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(PSICOLOGO)
+  crp          String?
+  specialty    String?
+  phone        String?
+  color        String   @default("#0d9488")
+  active       Boolean  @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  patients     Patient[]      @relation("PatientPsychologist")
+  appointments Appointment[]  @relation("AppointmentPsychologist")
+  createdAppts Appointment[]  @relation("AppointmentCreatedBy")
+  sessionNotes SessionNote[]
+  documents    Document[]
+  auditLogs    AuditLog[]
+  anamneses    Anamnesis[]
+
+  @@map("users")
+}
+
+model ClinicSettings {
+  id             String   @id @default(uuid()) @db.Uuid
+  name           String   @default("Clínica de Psicologia")
+  legalName      String?
+  cnpj           String?
+  phone          String?
+  email          String?
+  website        String?
+  zipCode        String?
+  street         String?
+  number         String?
+  complement     String?
+  district       String?
+  city           String?
+  state          String?
+  sessionMinutes Int      @default(50)
+  sessionPrice   Decimal  @default(200) @db.Decimal(10, 2)
+  openingHour    Int      @default(7)
+  closingHour    Int      @default(21)
+  updatedAt      DateTime @updatedAt
+
+  @@map("clinic_settings")
+}
+
+model Room {
+  id           String        @id @default(uuid()) @db.Uuid
+  name         String
+  description  String?
+  active       Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  appointments Appointment[]
+
+  @@map("rooms")
+}
+
+model HealthInsurance {
+  id        String    @id @default(uuid()) @db.Uuid
+  name      String    @unique
+  ansCode   String?
+  phone     String?
+  price     Decimal?  @db.Decimal(10, 2)
+  active    Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  patients  Patient[]
+
+  @@map("health_insurances")
+}
+
+model Patient {
+  id                     String        @id @default(uuid()) @db.Uuid
+  fullName               String
+  socialName             String?
+  cpf                    String?       @unique
+  rg                     String?
+  birthDate              DateTime?     @db.Date
+  gender                 Gender        @default(NAO_INFORMADO)
+  maritalStatus          String?
+  profession             String?
+  education              String?
+  email                  String?
+  phone                  String?
+  phone2                 String?
+  zipCode                String?
+  street                 String?
+  number                 String?
+  complement             String?
+  district               String?
+  city                   String?
+  state                  String?
+  emergencyName          String?
+  emergencyPhone         String?
+  emergencyRelation      String?
+  guardianName           String?
+  guardianCpf            String?
+  guardianPhone          String?
+  guardianRelation       String?
+  insuranceId            String?       @db.Uuid
+  insuranceNumber        String?
+  referralSource         String?
+  sessionPrice           Decimal?      @db.Decimal(10, 2)
+  status                 PatientStatus @default(ATIVO)
+  notes                  String?
+  lgpdConsent            Boolean       @default(false)
+  lgpdConsentAt          DateTime?
+  psychologistId         String?       @db.Uuid
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+
+  psychologist User?            @relation("PatientPsychologist", fields: [psychologistId], references: [id], onDelete: SetNull)
+  insurance    HealthInsurance? @relation(fields: [insuranceId], references: [id], onDelete: SetNull)
+  anamnesis    Anamnesis?
+  appointments Appointment[]
+  sessionNotes SessionNote[]
+  transactions Transaction[]
+  documents    Document[]
+
+  @@index([fullName])
+  @@index([status])
+  @@index([psychologistId])
+  @@map("patients")
+}
+
+model Anamnesis {
+  id                 String   @id @default(uuid()) @db.Uuid
+  patientId          String   @unique @db.Uuid
+  chiefComplaint     String?
+  historyOfIllness   String?
+  personalHistory    String?
+  familyHistory      String?
+  medicalHistory     String?
+  medications        String?
+  previousTreatments String?
+  substanceUse       String?
+  sleepAndDiet       String?
+  socialAndWork      String?
+  expectations       String?
+  observations       String?
+  updatedById        String?  @db.Uuid
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  patient   Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  updatedBy User?   @relation(fields: [updatedById], references: [id], onDelete: SetNull)
+
+  @@map("anamneses")
+}
+
+model Appointment {
+  id             String            @id @default(uuid()) @db.Uuid
+  patientId      String            @db.Uuid
+  psychologistId String            @db.Uuid
+  roomId         String?           @db.Uuid
+  startsAt       DateTime
+  endsAt         DateTime
+  status         AppointmentStatus @default(AGENDADO)
+  mode           AppointmentMode   @default(PRESENCIAL)
+  sessionType    SessionType       @default(INDIVIDUAL)
+  price          Decimal           @default(0) @db.Decimal(10, 2)
+  onlineLink     String?
+  notes          String?
+  recurrenceId   String?           @db.Uuid
+  createdById    String?           @db.Uuid
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  patient      Patient       @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  psychologist User          @relation("AppointmentPsychologist", fields: [psychologistId], references: [id], onDelete: Restrict)
+  room         Room?         @relation(fields: [roomId], references: [id], onDelete: SetNull)
+  createdBy    User?         @relation("AppointmentCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  sessionNote  SessionNote?
+  transactions Transaction[]
+
+  @@index([startsAt])
+  @@index([psychologistId, startsAt])
+  @@index([patientId, startsAt])
+  @@index([recurrenceId])
+  @@map("appointments")
+}
+
+model SessionNote {
+  id             String   @id @default(uuid()) @db.Uuid
+  patientId      String   @db.Uuid
+  psychologistId String   @db.Uuid
+  appointmentId  String?  @unique @db.Uuid
+  sessionDate    DateTime
+  sessionNumber  Int?
+  mood           String?
+  content        String
+  interventions  String?
+  plan           String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  patient      Patient      @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  psychologist User         @relation(fields: [psychologistId], references: [id], onDelete: Restrict)
+  appointment  Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  @@index([patientId, sessionDate])
+  @@map("session_notes")
+}
+
+model Transaction {
+  id            String            @id @default(uuid()) @db.Uuid
+  type          TransactionType
+  status        TransactionStatus @default(PENDENTE)
+  category      String
+  description   String
+  amount        Decimal           @db.Decimal(10, 2)
+  dueDate       DateTime          @db.Date
+  paidAt        DateTime?
+  method        PaymentMethod?
+  patientId     String?           @db.Uuid
+  appointmentId String?           @db.Uuid
+  notes         String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  patient     Patient?     @relation(fields: [patientId], references: [id], onDelete: SetNull)
+  appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+
+  @@index([dueDate])
+  @@index([type, status])
+  @@index([patientId])
+  @@map("transactions")
+}
+
+model Document {
+  id             String       @id @default(uuid()) @db.Uuid
+  patientId      String       @db.Uuid
+  psychologistId String       @db.Uuid
+  type           DocumentType
+  title          String
+  content        String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  patient      Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  psychologist User    @relation(fields: [psychologistId], references: [id], onDelete: Restrict)
+
+  @@index([patientId])
+  @@map("documents")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String?  @db.Uuid
+  action    String
+  entity    String
+  entityId  String?
+  details   String?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([entity, entityId])
+  @@map("audit_logs")
+}
