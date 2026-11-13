@@ -12,9 +12,9 @@ import { zodErrors, type ActionState } from "@/lib/action-state";
 import { onlyDigits, str } from "@/lib/utils";
 
 const baseSchema = z.object({
-  name: z.string({ required_error: "Informe o nome" }).min(3, "Informe o nome completo"),
+  name: z.string({ error: "Informe o nome" }).min(3, "Informe o nome completo"),
   email: z
-    .string({ required_error: "Informe o usuário ou e-mail" })
+    .string({ error: "Informe o usuário ou e-mail" })
     .min(3, "Mínimo de 3 caracteres")
     .regex(/^[a-z0-9._@+-]+$/, "Use apenas letras minúsculas, números e . _ - @"),
   role: z.enum(["ADMIN", "PSICOLOGO", "RECEPCAO"]),
@@ -25,7 +25,7 @@ const baseSchema = z.object({
 });
 
 const passwordRule = z
-  .string({ required_error: "Informe a senha" })
+  .string({ error: "Informe a senha" })
   .min(8, "Mínimo de 8 caracteres")
   .regex(/[A-Za-z]/, "Inclua letras")
   .regex(/\d/, "Inclua números");

@@ -11,7 +11,7 @@ import { zodErrors, type ActionState } from "@/lib/action-state";
 import { money, onlyDigits, str } from "@/lib/utils";
 
 const settingsSchema = z.object({
-  name: z.string({ required_error: "Informe o nome" }).min(2, "Informe o nome da clínica"),
+  name: z.string({ error: "Informe o nome" }).min(2, "Informe o nome da clínica"),
   legalName: z.string().nullable(),
   cnpj: z.string().nullable(),
   phone: z.string().nullable(),
