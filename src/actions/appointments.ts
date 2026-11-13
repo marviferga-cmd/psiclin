@@ -12,11 +12,11 @@ import { zodErrors, type ActionState } from "@/lib/action-state";
 import { money, str } from "@/lib/utils";
 
 const apptSchema = z.object({
-  patientId: z.string({ required_error: "Selecione o paciente" }).uuid("Selecione o paciente"),
-  psychologistId: z.string({ required_error: "Selecione o profissional" }).uuid("Selecione o profissional"),
+  patientId: z.string({ error: "Selecione o paciente" }).uuid("Selecione o paciente"),
+  psychologistId: z.string({ error: "Selecione o profissional" }).uuid("Selecione o profissional"),
   roomId: z.string().uuid().nullable(),
-  date: z.string({ required_error: "Informe a data" }).regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida"),
-  time: z.string({ required_error: "Informe o horário" }).regex(/^\d{2}:\d{2}$/, "Horário inválido"),
+  date: z.string({ error: "Informe a data" }).regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida"),
+  time: z.string({ error: "Informe o horário" }).regex(/^\d{2}:\d{2}$/, "Horário inválido"),
   duration: z.number().int().min(10, "Mínimo 10 min").max(480, "Máximo 8h"),
   mode: z.enum(["PRESENCIAL", "ONLINE"]),
   sessionType: z.enum(["INDIVIDUAL", "CASAL", "FAMILIA", "GRUPO", "AVALIACAO", "TRIAGEM"]),

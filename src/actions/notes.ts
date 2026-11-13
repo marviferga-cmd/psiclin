@@ -11,9 +11,9 @@ import { zodErrors, type ActionState } from "@/lib/action-state";
 import { str } from "@/lib/utils";
 
 const noteSchema = z.object({
-  sessionDate: z.date({ invalid_type_error: "Data inválida" }),
+  sessionDate: z.date({ error: "Data inválida" }),
   mood: z.string().nullable(),
-  content: z.string({ required_error: "Descreva a evolução" }).min(10, "Descreva a evolução (mín. 10 caracteres)"),
+  content: z.string({ error: "Descreva a evolução" }).min(10, "Descreva a evolução (mín. 10 caracteres)"),
   interventions: z.string().nullable(),
   plan: z.string().nullable(),
   appointmentId: z.string().uuid().nullable(),

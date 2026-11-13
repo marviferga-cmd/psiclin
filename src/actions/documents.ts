@@ -11,10 +11,10 @@ import { zodErrors, type ActionState } from "@/lib/action-state";
 import { str } from "@/lib/utils";
 
 const docSchema = z.object({
-  patientId: z.string({ required_error: "Selecione o paciente" }).uuid("Selecione o paciente"),
+  patientId: z.string({ error: "Selecione o paciente" }).uuid("Selecione o paciente"),
   type: z.enum(["ATESTADO", "DECLARACAO", "RECIBO", "RELATORIO", "LAUDO", "ENCAMINHAMENTO", "CONTRATO"]),
-  title: z.string({ required_error: "Informe o título" }).min(3, "Informe o título"),
-  content: z.string({ required_error: "Informe o conteúdo" }).min(10, "Conteúdo muito curto"),
+  title: z.string({ error: "Informe o título" }).min(3, "Informe o título"),
+  content: z.string({ error: "Informe o conteúdo" }).min(10, "Conteúdo muito curto"),
 });
 
 export async function saveDocumentAction(id: string | null, _prev: ActionState, form: FormData): Promise<ActionState> {

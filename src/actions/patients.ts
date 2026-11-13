@@ -14,7 +14,7 @@ import { isValidCPF, money, onlyDigits, parseDateOnly, str } from "@/lib/utils";
 const uuid = z.string().uuid().nullable();
 
 const patientSchema = z.object({
-  fullName: z.string({ required_error: "Informe o nome" }).min(3, "Informe o nome completo"),
+  fullName: z.string({ error: "Informe o nome" }).min(3, "Informe o nome completo"),
   socialName: z.string().nullable(),
   cpf: z
     .string()

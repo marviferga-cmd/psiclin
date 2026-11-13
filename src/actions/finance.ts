@@ -13,10 +13,10 @@ const METHODS = ["PIX", "DINHEIRO", "CARTAO_CREDITO", "CARTAO_DEBITO", "TRANSFER
 
 const txSchema = z.object({
   type: z.enum(["RECEITA", "DESPESA"]),
-  category: z.string({ required_error: "Informe a categoria" }).min(1, "Informe a categoria"),
-  description: z.string({ required_error: "Informe a descrição" }).min(2, "Informe a descrição"),
-  amount: z.number({ required_error: "Informe o valor", invalid_type_error: "Informe o valor" }).positive("Valor deve ser maior que zero"),
-  dueDate: z.date({ required_error: "Informe o vencimento", invalid_type_error: "Informe o vencimento" }),
+  category: z.string({ error: "Informe a categoria" }).min(1, "Informe a categoria"),
+  description: z.string({ error: "Informe a descrição" }).min(2, "Informe a descrição"),
+  amount: z.number({ error: "Informe o valor" }).positive("Valor deve ser maior que zero"),
+  dueDate: z.date({ error: "Informe o vencimento" }),
   status: z.enum(["PENDENTE", "PAGO", "CANCELADO"]),
   method: z.enum(METHODS).nullable(),
   patientId: z.string().uuid().nullable(),
