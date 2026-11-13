@@ -29,6 +29,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       user={{ name: user.name, email: user.email, roleLabel: ROLE_LABEL[user.role], color: user.color }}
       clinicName={settings?.name ?? "Clínica"}
       nav={nav}
+      help={{
+        role: user.role,
+        contact: {
+          // Contato do suporte exibido na Central de ajuda (opcional).
+          whatsapp: (process.env.SUPPORT_WHATSAPP ?? "").replace(/\D/g, "") || null,
+          email: process.env.SUPPORT_EMAIL?.trim() || null,
+        },
+      }}
     >
       {children}
     </AppShell>

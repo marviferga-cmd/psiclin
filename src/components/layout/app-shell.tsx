@@ -23,6 +23,8 @@ import {
 import { cn, initials } from "@/lib/utils";
 import { Toast } from "@/components/ui/client";
 import { logoutAction } from "@/actions/auth";
+import { HelpCenter, type SupportContact } from "@/components/help/help-center";
+import type { Role } from "@/lib/session-token";
 
 const ICONS = {
   dashboard: LayoutDashboard,
@@ -55,11 +57,13 @@ export function AppShell({
   user,
   clinicName,
   nav,
+  help,
   children,
 }: {
   user: { name: string; email: string; roleLabel: string; color: string };
   clinicName: string;
   nav: NavItem[];
+  help: { role: Role; contact: SupportContact };
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -181,6 +185,7 @@ export function AppShell({
           </form>
 
           <div className="ml-auto flex items-center gap-2">
+            <HelpCenter role={help.role} contact={help.contact} />
             <Link
               href="/agenda/novo"
               className="hidden h-10 items-center gap-2 rounded-lg bg-brand-600 px-4 text-sm font-medium text-white shadow-sm hover:bg-brand-700 sm:inline-flex"
